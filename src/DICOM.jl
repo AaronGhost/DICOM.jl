@@ -616,12 +616,12 @@ function write_element(st::IO, gelt::Tuple{UInt16,UInt16}, data, is_explicit, au
     end
 
     data = isempty(data) ? UInt8[] :
-        vr in ("OB", "OF", "OW", "ST", "LT", "UT") ? data :
-        vr in ("AE", "CS", "TM") ? string_write(data, 16) :
-        # Enforcing the length for this would require knowing the encoding of DICOM file (0x0008, 0x0005)
-        vr in ("SH", "LO", "PN") ? string_write(data, 0) :
+        vr in ("OB", "OF", "OW", "UT") ? data :
+        vr == "ST" ? string_wite(data, 1024) :
+        vr == "LT" ? string_write(data, 10240) :
+        vr in ("SH", "AE", "CS", "TM") ? string_write(data, 16) :
         vr == "DA" ? string_write(data, 8) :
-        vr == "UI" ? string_write(data, 64) :
+        vr == ("LO", "UI") ? string_write(data, 64) :
         vr == "DT" ? string_write(data, 26) :
         vr == "FL" ? convert(Array{Float32,1}, data) :
         vr == "FD" ? convert(Array{Float64,1}, data) :
