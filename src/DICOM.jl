@@ -615,15 +615,10 @@ function write_element(st::IO, gelt::Tuple{UInt16,UInt16}, data, is_explicit, au
         data = [data]
     end
 
-    # For PN, we need to enforce the length of each component
-    if vr == "PN"
-        data = join([string_write(x, 64) for x in split(data, '^')], '^')
-    end
-
     data = isempty(data) ? UInt8[] :
         vr in ("OB", "OF", "OW", "UT") ? data :
-        vr == "PN" ? string_write(data, 0) : # Limits already enforced above
-        vr == "ST" ? string_wite(data, 1024) :
+        vr == "PN" ? string_write(data, 0) : # Enforce maximum length component by component
+        vr == "ST" ? join([string_write(x, 64) for x in split(data, '^')], '^') :
         vr == "LT" ? string_write(data, 10240) :
         vr in ("SH", "AE", "CS", "TM") ? string_write(data, 16) :
         vr == "DA" ? string_write(data, 8) :
